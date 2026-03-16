@@ -7,10 +7,7 @@ var eventDefinitionKey = '';
 
 // ---- Postmonger lifecycle ----
 
-// Wait for JB to signal it's ready, then respond
-connection.on('ready', function () {
-  connection.trigger('ready');
-});
+connection.trigger('ready');
 
 connection.on('initActivity', function (payload) {
   activityPayload = payload || {};

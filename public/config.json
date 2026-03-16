@@ -37,14 +37,14 @@
     }
   },
   "wizardSteps": [
-    { "label": "Create Definition", "key": "step1" },
+    { "label": "Criar Send Definition", "key": "step1" },
     { "label": "Configure Send", "key": "step2" }
   ],
   "userInterfaces": {
-    "configurationSupports498": true,
     "configInspector": {
       "size": "scm-lg",
-      "emptyIframe": true
+      "emptyIframe": false,
+      "url": "{{BASE_URL}}/index.html"
     }
   },
   "schema": {
