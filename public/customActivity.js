@@ -30,9 +30,15 @@ connection.on('initActivity', function (payload) {
       activityPayload.arguments.execute.inArguments) || []
   );
 
-  // Restore saved MID if we couldn't detect from context
+  // Restore saved MID
   if (!currentMid && args.mid) {
     currentMid = args.mid;
+  }
+
+  // Pre-fill MID fields if we have it
+  if (currentMid) {
+    document.getElementById('defMid').value = currentMid;
+    document.getElementById('cfgMid').value = currentMid;
   }
 
   if (args.definitionKey) {
@@ -155,6 +161,9 @@ function mergeInArguments(inArguments) {
 }
 
 function saveActivity() {
+  var cfgMid = document.getElementById('cfgMid').value.trim();
+  if (cfgMid) currentMid = cfgMid;
+
   var definitionKey = document.getElementById('cfgDefinitionKey').value.trim();
   var contactKey = document.getElementById('cfgContactKey').value;
   var to = document.getElementById('cfgTo').value;
@@ -180,15 +189,19 @@ document.getElementById('btnCreateDef').addEventListener('click', function () {
   var btn = this;
   var statusEl = document.getElementById('createDefStatus');
 
+  var mid = document.getElementById('defMid').value.trim();
   var defKey = document.getElementById('defKey').value.trim();
   var defName = document.getElementById('defName').value.trim();
   var senderId = document.getElementById('senderId').value.trim();
   var customerKey = document.getElementById('customerKey').value.trim();
   var description = document.getElementById('defDescription').value.trim();
 
-  if (!defKey || !defName || !senderId || !customerKey) {
+  // Update currentMid from the form field
+  currentMid = mid;
+
+  if (!mid || !defKey || !defName || !senderId || !customerKey) {
     statusEl.className = 'error';
-    statusEl.textContent = 'Preencha todos os campos obrigatorios.';
+    statusEl.textContent = 'Preencha todos os campos obrigatorios (incluindo MID).';
     statusEl.style.display = 'block';
     return;
   }
@@ -206,7 +219,7 @@ document.getElementById('btnCreateDef').addEventListener('click', function () {
       senderId: senderId,
       customerKey: customerKey,
       description: description,
-      mid: currentMid
+      mid: mid
     })
   })
     .then(function (resp) {
@@ -219,6 +232,7 @@ document.getElementById('btnCreateDef').addEventListener('click', function () {
         statusEl.className = 'success';
         statusEl.textContent = 'Definition criada com sucesso! Key: ' + defKey;
         document.getElementById('cfgDefinitionKey').value = defKey;
+        document.getElementById('cfgMid').value = mid;
         setTimeout(function () { showStep('step2'); }, 1500);
       } else {
         statusEl.className = 'error';
