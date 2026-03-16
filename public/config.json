@@ -16,7 +16,8 @@
       "inArguments": [
         { "contactKey": "" },
         { "to": "" },
-        { "definitionKey": "" }
+        { "definitionKey": "" },
+        { "mid": "" }
       ],
       "outArguments": [],
       "url": "{{BASE_URL}}/activity/execute"
@@ -69,6 +70,13 @@
             "definitionKey": {
               "dataType": "Text",
               "isNullable": false,
+              "direction": "in"
+            }
+          },
+          {
+            "mid": {
+              "dataType": "Text",
+              "isNullable": true,
               "direction": "in"
             }
           }

@@ -15,10 +15,9 @@ function mergeInArguments(inArguments) {
 }
 
 // POST /activity/create-definition
-// Creates an OTT (WhatsApp) send definition in SFMC
 router.post('/create-definition', async (req, res) => {
   try {
-    const { definitionKey, name, senderId, description, customerKey } = req.body;
+    const { definitionKey, name, senderId, description, customerKey, mid } = req.body;
 
     if (!definitionKey || !name || !senderId || !customerKey) {
       return res.status(400).json({
@@ -26,7 +25,7 @@ router.post('/create-definition', async (req, res) => {
       });
     }
 
-    const token = await getAccessToken();
+    const token = await getAccessToken(mid);
 
     const payload = {
       definitionKey,
@@ -56,20 +55,19 @@ router.post('/create-definition', async (req, res) => {
 });
 
 // POST /activity/execute
-// Called by JB for each contact entering the activity
 router.post('/execute', async (req, res) => {
   try {
     const { inArguments } = req.body;
     const args = mergeInArguments(inArguments);
 
-    const { contactKey, to, definitionKey } = args;
+    const { contactKey, to, definitionKey, mid } = args;
 
     if (!contactKey || !to || !definitionKey) {
       console.error('Execute missing fields:', { contactKey, to, definitionKey });
       return res.status(400).json({ error: 'Missing contactKey, to, or definitionKey' });
     }
 
-    const token = await getAccessToken();
+    const token = await getAccessToken(mid);
 
     const payload = {
       definitionKey,

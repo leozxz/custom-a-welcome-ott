@@ -4,6 +4,7 @@ var connection = new Postmonger.Session();
 var activityPayload = {};
 var schema = [];
 var eventDefinitionKey = '';
+var currentMid = '';
 
 // ---- Postmonger lifecycle ----
 
@@ -12,11 +13,27 @@ connection.trigger('ready');
 connection.on('initActivity', function (payload) {
   activityPayload = payload || {};
 
+  // Extract MID from JB context (try multiple possible fields)
+  currentMid = activityPayload.eid
+    || activityPayload.organizationId
+    || activityPayload.memberid
+    || activityPayload.mid
+    || '';
+
+  // Log payload to help debug MID detection
+  console.log('[WhatsApp OTT] initActivity payload:', JSON.stringify(activityPayload, null, 2));
+  console.log('[WhatsApp OTT] Detected MID:', currentMid);
+
   var args = mergeInArguments(
     (activityPayload.arguments &&
       activityPayload.arguments.execute &&
       activityPayload.arguments.execute.inArguments) || []
   );
+
+  // Restore saved MID if we couldn't detect from context
+  if (!currentMid && args.mid) {
+    currentMid = args.mid;
+  }
 
   if (args.definitionKey) {
     document.getElementById('cfgDefinitionKey').value = args.definitionKey;
@@ -74,17 +91,14 @@ function showStep(stepId) {
   document.getElementById(stepId).classList.add('active');
 }
 
-// Home card: Create new definition
 document.getElementById('cardCreate').addEventListener('click', function () {
   showStep('step1');
 });
 
-// Home card: Use existing definition -> go straight to configure
 document.getElementById('cardExisting').addEventListener('click', function () {
   showStep('step2');
 });
 
-// Back buttons
 document.getElementById('btnBackToHome').addEventListener('click', function () {
   showStep('stepHome');
 });
@@ -93,12 +107,10 @@ document.getElementById('btnBackToHome2').addEventListener('click', function () 
   showStep('stepHome');
 });
 
-// Close button
 document.getElementById('btnClose').addEventListener('click', function () {
   connection.trigger('destroy');
 });
 
-// Save button on step2
 document.getElementById('btnSave').addEventListener('click', function () {
   saveActivity();
 });
@@ -152,7 +164,8 @@ function saveActivity() {
   activityPayload.arguments.execute.inArguments = [
     { contactKey: contactKey },
     { to: to },
-    { definitionKey: definitionKey }
+    { definitionKey: definitionKey },
+    { mid: currentMid }
   ];
 
   activityPayload.metaData = activityPayload.metaData || {};
@@ -192,7 +205,8 @@ document.getElementById('btnCreateDef').addEventListener('click', function () {
       name: defName,
       senderId: senderId,
       customerKey: customerKey,
-      description: description
+      description: description,
+      mid: currentMid
     })
   })
     .then(function (resp) {
@@ -204,9 +218,7 @@ document.getElementById('btnCreateDef').addEventListener('click', function () {
       if (result.ok) {
         statusEl.className = 'success';
         statusEl.textContent = 'Definition criada com sucesso! Key: ' + defKey;
-        // Auto-fill the definition key in step2
         document.getElementById('cfgDefinitionKey').value = defKey;
-        // Go to step2 after 1.5s
         setTimeout(function () { showStep('step2'); }, 1500);
       } else {
         statusEl.className = 'error';
