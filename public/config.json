@@ -1,0 +1,79 @@
+{
+  "workflowApiVersion": "1.1",
+  "metaData": {
+    "icon": "icon.png",
+    "category": "message"
+  },
+  "type": "REST",
+  "lang": {
+    "en-US": {
+      "name": "WhatsApp Transacional",
+      "description": "Envia mensagem WhatsApp transacional via OTT"
+    }
+  },
+  "arguments": {
+    "execute": {
+      "inArguments": [
+        { "contactKey": "" },
+        { "to": "" },
+        { "definitionKey": "" }
+      ],
+      "outArguments": [],
+      "url": "{{BASE_URL}}/activity/execute"
+    }
+  },
+  "configurationArguments": {
+    "save": {
+      "url": "{{BASE_URL}}/activity/save"
+    },
+    "validate": {
+      "url": "{{BASE_URL}}/activity/validate"
+    },
+    "publish": {
+      "url": "{{BASE_URL}}/activity/publish"
+    },
+    "stop": {
+      "url": "{{BASE_URL}}/activity/stop"
+    }
+  },
+  "wizardSteps": [
+    { "label": "Create Definition", "key": "step1" },
+    { "label": "Configure Send", "key": "step2" }
+  ],
+  "userInterfaces": {
+    "configurationSupports498": true,
+    "configInspector": {
+      "size": "scm-lg",
+      "emptyIframe": true
+    }
+  },
+  "schema": {
+    "arguments": {
+      "execute": {
+        "inArguments": [
+          {
+            "contactKey": {
+              "dataType": "Text",
+              "isNullable": false,
+              "direction": "in"
+            }
+          },
+          {
+            "to": {
+              "dataType": "Phone",
+              "isNullable": false,
+              "direction": "in"
+            }
+          },
+          {
+            "definitionKey": {
+              "dataType": "Text",
+              "isNullable": false,
+              "direction": "in"
+            }
+          }
+        ]
+      }
+    }
+  }
+}
