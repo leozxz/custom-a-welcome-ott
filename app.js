@@ -46,6 +46,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/activity', activityRoutes);
 app.use('/auth', authRoutes);
 
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', baseUrl: process.env.BASE_URL, timestamp: new Date().toISOString() });
+});
+
+// Catch-all: log any unmatched requests
+app.use((req, res) => {
+  console.log(`[404] ${req.method} ${req.url} — no route matched`);
+  res.status(404).json({ error: 'Not found', path: req.url });
+});
+
 app.listen(PORT, () => {
   console.log(`Custom Activity server running on port ${PORT}`);
+  console.log(`BASE_URL: ${process.env.BASE_URL}`);
 });
