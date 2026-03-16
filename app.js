@@ -10,8 +10,25 @@ const authRoutes = require('./routes/auth');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// CORS for all requests
+app.use((req, res, next) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-sfmc-activity-key');
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Log all requests for debugging
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
 
 // Serve config.json dynamically with BASE_URL replacement (BEFORE static)
 app.get('/config.json', (req, res) => {
@@ -22,13 +39,8 @@ app.get('/config.json', (req, res) => {
   res.type('application/json').send(config);
 });
 
-// Serve static files from /public (config.json is handled above)
-app.use(express.static(path.join(__dirname, 'public'), {
-  index: 'index.html',
-  setHeaders: (res) => {
-    res.set('Access-Control-Allow-Origin', '*');
-  }
-}));
+// Serve static files from /public
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes
 app.use('/activity', activityRoutes);

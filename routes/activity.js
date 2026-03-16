@@ -119,27 +119,32 @@ router.post('/execute', async (req, res) => {
 
 // POST /activity/save
 router.post('/save', (req, res) => {
+  console.log('[save] headers:', JSON.stringify(req.headers, null, 2));
   console.log('[save] body:', JSON.stringify(req.body, null, 2));
-  res.status(200).json({ status: 'ok' });
+  // Return the payload back to JB
+  res.status(200).json(req.body);
 });
 
 // POST /activity/validate
 router.post('/validate', (req, res) => {
+  console.log('[validate] headers:', JSON.stringify(req.headers, null, 2));
   console.log('[validate] body:', JSON.stringify(req.body, null, 2));
-  // Always return 200 — JB treats non-200 as validation failure
-  res.status(200).json({ status: 'ok' });
+  // Must return 200 with the payload — JB blocks activation on non-200
+  res.status(200).json(req.body);
 });
 
 // POST /activity/publish
 router.post('/publish', (req, res) => {
+  console.log('[publish] headers:', JSON.stringify(req.headers, null, 2));
   console.log('[publish] body:', JSON.stringify(req.body, null, 2));
-  res.status(200).json({ status: 'ok' });
+  res.status(200).json(req.body);
 });
 
 // POST /activity/stop
 router.post('/stop', (req, res) => {
+  console.log('[stop] headers:', JSON.stringify(req.headers, null, 2));
   console.log('[stop] body:', JSON.stringify(req.body, null, 2));
-  res.status(200).json({ status: 'ok' });
+  res.status(200).json(req.body);
 });
 
 module.exports = router;
