@@ -34,7 +34,7 @@ app.use((req, res, next) => {
 app.get('/config.json', (req, res) => {
   const configPath = path.join(__dirname, 'public', 'config.json');
   const raw = fs.readFileSync(configPath, 'utf8');
-  const baseUrl = process.env.BASE_URL || '';
+  const baseUrl = (process.env.BASE_URL || '').replace(/\/+$/, '');
   const config = raw.replace(/\{\{BASE_URL\}\}/g, baseUrl);
   res.type('application/json').send(config);
 });
