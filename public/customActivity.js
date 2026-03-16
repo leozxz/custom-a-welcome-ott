@@ -84,12 +84,34 @@ connection.on('gotoStep', function (step) {
 
 // ---- Navigation ----
 
+var stepOrder = ['stepHome', 'step1', 'step2'];
+
 function showStep(stepId) {
   var steps = document.querySelectorAll('.step');
   for (var i = 0; i < steps.length; i++) {
     steps[i].classList.remove('active');
   }
   document.getElementById(stepId).classList.add('active');
+  updateStepIndicator(stepId);
+}
+
+function updateStepIndicator(activeStepId) {
+  var dots = document.querySelectorAll('.step-dot');
+  var lines = document.querySelectorAll('.step-line');
+  var activeIndex = stepOrder.indexOf(activeStepId);
+
+  dots.forEach(function (dot, i) {
+    dot.classList.remove('active', 'completed');
+    if (i === activeIndex) {
+      dot.classList.add('active');
+    } else if (i < activeIndex) {
+      dot.classList.add('completed');
+    }
+  });
+
+  lines.forEach(function (line, i) {
+    line.classList.toggle('active', i < activeIndex);
+  });
 }
 
 document.getElementById('cardCreate').addEventListener('click', function () {
@@ -230,14 +252,14 @@ document.getElementById('btnCreateDef').addEventListener('click', function () {
   currentMid = mid;
 
   if (!mid || !defKey || !defName || !senderId || !customerKey) {
-    statusEl.className = 'error';
-    statusEl.textContent = 'Preencha todos os campos obrigatorios (incluindo MID).';
-    statusEl.style.display = 'block';
+    statusEl.className = 'toast error';
+    statusEl.innerHTML = '<span class="toast-icon">&#9888;</span> Preencha todos os campos obrigatorios (incluindo MID).';
     return;
   }
 
   btn.disabled = true;
-  btn.textContent = 'Criando...';
+  btn.innerHTML = '<span class="spinner"></span> Criando...';
+  statusEl.className = 'toast';
   statusEl.style.display = 'none';
 
   fetch('/activity/create-definition', {
@@ -259,8 +281,8 @@ document.getElementById('btnCreateDef').addEventListener('click', function () {
     })
     .then(function (result) {
       if (result.ok) {
-        statusEl.className = 'success';
-        statusEl.textContent = 'Definition criada com sucesso! Key: ' + defKey;
+        statusEl.className = 'toast success';
+        statusEl.innerHTML = '<span class="toast-icon">&#10003;</span> Definition criada com sucesso! Key: <strong>' + defKey + '</strong>';
         // Sync MID to step2 and load definitions
         document.getElementById('cfgMid').value = mid;
         loadDefinitions(mid, function () {
@@ -268,19 +290,17 @@ document.getElementById('btnCreateDef').addEventListener('click', function () {
         });
         setTimeout(function () { showStep('step2'); }, 1500);
       } else {
-        statusEl.className = 'error';
-        statusEl.textContent =
-          'Erro: ' + (result.data.error?.message || JSON.stringify(result.data.error) || 'Erro desconhecido');
+        statusEl.className = 'toast error';
+        statusEl.innerHTML =
+          '<span class="toast-icon">&#9888;</span> Erro: ' + (result.data.error?.message || JSON.stringify(result.data.error) || 'Erro desconhecido');
       }
-      statusEl.style.display = 'block';
     })
     .catch(function (err) {
-      statusEl.className = 'error';
-      statusEl.textContent = 'Erro de rede: ' + err.message;
-      statusEl.style.display = 'block';
+      statusEl.className = 'toast error';
+      statusEl.innerHTML = '<span class="toast-icon">&#9888;</span> Erro de rede: ' + err.message;
     })
     .finally(function () {
       btn.disabled = false;
-      btn.textContent = 'Criar Definition';
+      btn.innerHTML = 'Criar Definition';
     });
 });
