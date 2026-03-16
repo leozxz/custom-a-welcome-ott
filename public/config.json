@@ -20,7 +20,8 @@
         { "mid": "" }
       ],
       "outArguments": [],
-      "url": "{{BASE_URL}}/activity/execute"
+      "url": "{{BASE_URL}}/activity/execute",
+      "timeout": 10000
     }
   },
   "configurationArguments": {
