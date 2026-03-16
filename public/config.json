@@ -2,6 +2,8 @@
   "workflowApiVersion": "1.1",
   "metaData": {
     "icon": "icon.png",
+    "iconColor": "#70c4bd",
+    "backgroundColor": "#70c4bd",
     "category": "message"
   },
   "type": "REST",
