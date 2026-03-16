@@ -8,8 +8,31 @@
 </head>
 <body>
 
+  <!-- Close button -->
+  <button id="btnClose" class="btn-close" title="Fechar">&times;</button>
+
+  <!-- Home: Choose flow -->
+  <div id="stepHome" class="step active">
+    <h2>WhatsApp Transacional (OTT)</h2>
+    <p class="subtitle">O que deseja fazer?</p>
+
+    <div class="cards">
+      <div class="card" id="cardCreate">
+        <div class="card-icon">+</div>
+        <h3>Criar Send Definition</h3>
+        <p>Crie uma nova definition OTT WhatsApp antes de configurar o envio.</p>
+      </div>
+
+      <div class="card" id="cardExisting">
+        <div class="card-icon">&#9993;</div>
+        <h3>Usar Definition Existente</h3>
+        <p>Ja tenho uma definition criada e quero configurar o envio direto.</p>
+      </div>
+    </div>
+  </div>
+
   <!-- Step 1: Create OTT Definition -->
-  <div id="step1" class="step active">
+  <div id="step1" class="step">
     <h2>Criar Send Definition</h2>
 
     <div class="form-group">
@@ -37,7 +60,10 @@
       <textarea id="defDescription" placeholder="Descricao da definition"></textarea>
     </div>
 
-    <button id="btnCreateDef" class="btn btn-primary">Criar Definition</button>
+    <div class="btn-row">
+      <button id="btnBackToHome" class="btn btn-secondary">Voltar</button>
+      <button id="btnCreateDef" class="btn btn-primary">Criar Definition</button>
+    </div>
     <div id="createDefStatus"></div>
   </div>
 
@@ -47,8 +73,8 @@
 
     <div class="form-group">
       <label for="cfgDefinitionKey">Definition Key</label>
-      <input type="text" id="cfgDefinitionKey" placeholder="Definition key criada no step anterior" />
-      <p class="hint">Informe a definition key criada no passo anterior ou uma existente.</p>
+      <input type="text" id="cfgDefinitionKey" placeholder="Informe a definition key" />
+      <p class="hint">Definition key criada anteriormente ou uma existente.</p>
     </div>
 
     <div class="form-group">
@@ -65,6 +91,11 @@
         <option value="">-- Selecione um campo --</option>
       </select>
       <p class="hint">Campo da Data Extension de entrada que contem o numero WhatsApp destino.</p>
+    </div>
+
+    <div class="btn-row">
+      <button id="btnBackToHome2" class="btn btn-secondary">Voltar</button>
+      <button id="btnSave" class="btn btn-primary">Salvar</button>
     </div>
   </div>
 

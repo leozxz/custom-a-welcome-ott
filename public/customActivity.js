@@ -12,7 +12,6 @@ connection.trigger('ready');
 connection.on('initActivity', function (payload) {
   activityPayload = payload || {};
 
-  // Restore saved values if editing an existing activity
   var args = mergeInArguments(
     (activityPayload.arguments &&
       activityPayload.arguments.execute &&
@@ -23,7 +22,6 @@ connection.on('initActivity', function (payload) {
     document.getElementById('cfgDefinitionKey').value = args.definitionKey;
   }
 
-  // Request schema to populate field dropdowns
   connection.trigger('requestSchema');
   connection.trigger('requestTriggerEventDefinition');
 });
@@ -38,7 +36,6 @@ connection.on('requestedSchema', function (data) {
   schema = data && data.schema ? data.schema : [];
   populateFieldDropdowns(schema);
 
-  // Restore selected field values after populating dropdowns
   var args = mergeInArguments(
     (activityPayload.arguments &&
       activityPayload.arguments.execute &&
@@ -53,49 +50,21 @@ connection.on('requestedSchema', function (data) {
   }
 });
 
-// Step navigation from JB
+// JB step navigation
 connection.on('clickedNext', function () {
-  var currentStep = getCurrentStep();
-
-  if (currentStep === 'step1') {
-    // Moving from step1 to step2: auto-fill definitionKey if created
-    var defKey = document.getElementById('defKey').value.trim();
-    var cfgField = document.getElementById('cfgDefinitionKey');
-    if (defKey && !cfgField.value) {
-      cfgField.value = defKey;
-    }
-    showStep('step2');
-    connection.trigger('nextStep');
-  } else if (currentStep === 'step2') {
-    // Final step: save the activity
-    saveActivity();
-    connection.trigger('nextStep');
-  }
+  saveActivity();
+  connection.trigger('nextStep');
 });
 
 connection.on('clickedBack', function () {
-  var currentStep = getCurrentStep();
-  if (currentStep === 'step2') {
-    showStep('step1');
-    connection.trigger('prevStep');
-  }
+  connection.trigger('prevStep');
 });
 
 connection.on('gotoStep', function (step) {
   showStep(step.key);
 });
 
-// ---- UI logic ----
-
-function getCurrentStep() {
-  var steps = document.querySelectorAll('.step');
-  for (var i = 0; i < steps.length; i++) {
-    if (steps[i].classList.contains('active')) {
-      return steps[i].id;
-    }
-  }
-  return 'step1';
-}
+// ---- Navigation ----
 
 function showStep(stepId) {
   var steps = document.querySelectorAll('.step');
@@ -105,11 +74,41 @@ function showStep(stepId) {
   document.getElementById(stepId).classList.add('active');
 }
 
+// Home card: Create new definition
+document.getElementById('cardCreate').addEventListener('click', function () {
+  showStep('step1');
+});
+
+// Home card: Use existing definition -> go straight to configure
+document.getElementById('cardExisting').addEventListener('click', function () {
+  showStep('step2');
+});
+
+// Back buttons
+document.getElementById('btnBackToHome').addEventListener('click', function () {
+  showStep('stepHome');
+});
+
+document.getElementById('btnBackToHome2').addEventListener('click', function () {
+  showStep('stepHome');
+});
+
+// Close button
+document.getElementById('btnClose').addEventListener('click', function () {
+  connection.trigger('destroy');
+});
+
+// Save button on step2
+document.getElementById('btnSave').addEventListener('click', function () {
+  saveActivity();
+});
+
+// ---- Field dropdowns ----
+
 function populateFieldDropdowns(schemaFields) {
   var contactKeySelect = document.getElementById('cfgContactKey');
   var toSelect = document.getElementById('cfgTo');
 
-  // Clear existing options (keep placeholder)
   contactKeySelect.innerHTML = '<option value="">-- Selecione um campo --</option>';
   toSelect.innerHTML = '<option value="">-- Selecione um campo --</option>';
 
@@ -118,8 +117,6 @@ function populateFieldDropdowns(schemaFields) {
   schemaFields.forEach(function (field) {
     var key = field.key || '';
     var name = field.name || key;
-
-    // Build JB data binding expression
     var bindingExpr = '{{' + key + '}}';
 
     var opt1 = document.createElement('option');
@@ -133,6 +130,8 @@ function populateFieldDropdowns(schemaFields) {
     toSelect.appendChild(opt2);
   });
 }
+
+// ---- Save / helpers ----
 
 function mergeInArguments(inArguments) {
   if (!Array.isArray(inArguments)) return {};
@@ -162,7 +161,7 @@ function saveActivity() {
   connection.trigger('updateActivity', activityPayload);
 }
 
-// ---- Create Definition button ----
+// ---- Create Definition ----
 
 document.getElementById('btnCreateDef').addEventListener('click', function () {
   var btn = this;
@@ -205,6 +204,10 @@ document.getElementById('btnCreateDef').addEventListener('click', function () {
       if (result.ok) {
         statusEl.className = 'success';
         statusEl.textContent = 'Definition criada com sucesso! Key: ' + defKey;
+        // Auto-fill the definition key in step2
+        document.getElementById('cfgDefinitionKey').value = defKey;
+        // Go to step2 after 1.5s
+        setTimeout(function () { showStep('step2'); }, 1500);
       } else {
         statusEl.className = 'error';
         statusEl.textContent =
