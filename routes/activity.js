@@ -54,6 +54,28 @@ router.post('/create-definition', async (req, res) => {
   }
 });
 
+// GET /activity/definitions?mid=XXXXXX
+// Lists all OTT definitions for a given BU
+router.get('/definitions', async (req, res) => {
+  try {
+    const { mid } = req.query;
+    const token = await getAccessToken(mid);
+
+    const response = await axios.get(
+      `${process.env.SFMC_API_BASE}/messaging/v1/ott/definitions/`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    const definitions = response.data.definitions || response.data.items || [];
+    res.json({ definitions });
+  } catch (err) {
+    console.error('List definitions error:', err.response?.data || err.message);
+    res.status(err.response?.status || 500).json({
+      error: err.response?.data || err.message
+    });
+  }
+});
+
 // POST /activity/execute
 router.post('/execute', async (req, res) => {
   try {

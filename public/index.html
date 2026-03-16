@@ -37,8 +37,11 @@
 
     <div class="form-group">
       <label for="defMid">MID (Business Unit)</label>
-      <input type="text" id="defMid" placeholder="ex: 514XXXXXX" />
-      <p class="hint">MID da Business Unit onde o canal WhatsApp esta configurado.</p>
+      <select id="defMid">
+        <option value="">-- Selecione a BU --</option>
+        <option value="518005767">Finclass (518005767)</option>
+      </select>
+      <p class="hint">Business Unit onde o canal WhatsApp esta configurado.</p>
     </div>
 
     <div class="form-group">
@@ -79,14 +82,19 @@
 
     <div class="form-group">
       <label for="cfgMid">MID (Business Unit)</label>
-      <input type="text" id="cfgMid" placeholder="ex: 514XXXXXX" />
-      <p class="hint">MID da Business Unit onde o canal WhatsApp esta configurado.</p>
+      <select id="cfgMid">
+        <option value="">-- Selecione a BU --</option>
+        <option value="518005767">Finclass (518005767)</option>
+      </select>
+      <p class="hint">Selecione a BU para carregar as definitions disponiveis.</p>
     </div>
 
     <div class="form-group">
       <label for="cfgDefinitionKey">Definition Key</label>
-      <input type="text" id="cfgDefinitionKey" placeholder="Informe a definition key" />
-      <p class="hint">Definition key criada anteriormente ou uma existente.</p>
+      <select id="cfgDefinitionKey">
+        <option value="">-- Selecione a BU primeiro --</option>
+      </select>
+      <p class="hint">Definitions OTT disponiveis na BU selecionada.</p>
     </div>
 
     <div class="form-group">

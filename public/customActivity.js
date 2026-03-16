@@ -13,16 +13,7 @@ connection.trigger('ready');
 connection.on('initActivity', function (payload) {
   activityPayload = payload || {};
 
-  // Extract MID from JB context (try multiple possible fields)
-  currentMid = activityPayload.eid
-    || activityPayload.organizationId
-    || activityPayload.memberid
-    || activityPayload.mid
-    || '';
-
-  // Log payload to help debug MID detection
   console.log('[WhatsApp OTT] initActivity payload:', JSON.stringify(activityPayload, null, 2));
-  console.log('[WhatsApp OTT] Detected MID:', currentMid);
 
   var args = mergeInArguments(
     (activityPayload.arguments &&
@@ -30,23 +21,27 @@ connection.on('initActivity', function (payload) {
       activityPayload.arguments.execute.inArguments) || []
   );
 
-  // Restore saved MID
-  if (!currentMid && args.mid) {
+  // Restore saved values
+  if (args.mid) {
     currentMid = args.mid;
-  }
-
-  // Pre-fill MID fields if we have it
-  if (currentMid) {
     document.getElementById('defMid').value = currentMid;
     document.getElementById('cfgMid').value = currentMid;
   }
 
   if (args.definitionKey) {
-    document.getElementById('cfgDefinitionKey').value = args.definitionKey;
+    // Load definitions for the saved MID then select the right one
+    if (currentMid) {
+      loadDefinitions(currentMid, function () {
+        document.getElementById('cfgDefinitionKey').value = args.definitionKey;
+      });
+    }
   }
 
   connection.trigger('requestSchema');
   connection.trigger('requestTriggerEventDefinition');
+
+  // Always show home
+  showStep('stepHome');
 });
 
 connection.on('requestedTriggerEventDefinition', function (eventDef) {
@@ -121,6 +116,42 @@ document.getElementById('btnSave').addEventListener('click', function () {
   saveActivity();
 });
 
+// ---- Load definitions by MID ----
+
+document.getElementById('cfgMid').addEventListener('change', function () {
+  var mid = this.value;
+  currentMid = mid;
+  if (mid) {
+    loadDefinitions(mid);
+  } else {
+    var sel = document.getElementById('cfgDefinitionKey');
+    sel.innerHTML = '<option value="">-- Selecione a BU primeiro --</option>';
+  }
+});
+
+function loadDefinitions(mid, callback) {
+  var sel = document.getElementById('cfgDefinitionKey');
+  sel.innerHTML = '<option value="">Carregando...</option>';
+
+  fetch('/activity/definitions?mid=' + encodeURIComponent(mid))
+    .then(function (resp) { return resp.json(); })
+    .then(function (data) {
+      sel.innerHTML = '<option value="">-- Selecione uma definition --</option>';
+      var defs = data.definitions || [];
+      defs.forEach(function (def) {
+        var opt = document.createElement('option');
+        opt.value = def.definitionKey;
+        opt.textContent = def.name + ' (' + def.definitionKey + ')';
+        sel.appendChild(opt);
+      });
+      if (callback) callback();
+    })
+    .catch(function (err) {
+      console.error('Error loading definitions:', err);
+      sel.innerHTML = '<option value="">Erro ao carregar definitions</option>';
+    });
+}
+
 // ---- Field dropdowns ----
 
 function populateFieldDropdowns(schemaFields) {
@@ -161,10 +192,10 @@ function mergeInArguments(inArguments) {
 }
 
 function saveActivity() {
-  var cfgMid = document.getElementById('cfgMid').value.trim();
+  var cfgMid = document.getElementById('cfgMid').value;
   if (cfgMid) currentMid = cfgMid;
 
-  var definitionKey = document.getElementById('cfgDefinitionKey').value.trim();
+  var definitionKey = document.getElementById('cfgDefinitionKey').value;
   var contactKey = document.getElementById('cfgContactKey').value;
   var to = document.getElementById('cfgTo').value;
 
@@ -189,14 +220,13 @@ document.getElementById('btnCreateDef').addEventListener('click', function () {
   var btn = this;
   var statusEl = document.getElementById('createDefStatus');
 
-  var mid = document.getElementById('defMid').value.trim();
+  var mid = document.getElementById('defMid').value;
   var defKey = document.getElementById('defKey').value.trim();
   var defName = document.getElementById('defName').value.trim();
   var senderId = document.getElementById('senderId').value.trim();
   var customerKey = document.getElementById('customerKey').value.trim();
   var description = document.getElementById('defDescription').value.trim();
 
-  // Update currentMid from the form field
   currentMid = mid;
 
   if (!mid || !defKey || !defName || !senderId || !customerKey) {
@@ -231,8 +261,11 @@ document.getElementById('btnCreateDef').addEventListener('click', function () {
       if (result.ok) {
         statusEl.className = 'success';
         statusEl.textContent = 'Definition criada com sucesso! Key: ' + defKey;
-        document.getElementById('cfgDefinitionKey').value = defKey;
+        // Sync MID to step2 and load definitions
         document.getElementById('cfgMid').value = mid;
+        loadDefinitions(mid, function () {
+          document.getElementById('cfgDefinitionKey').value = defKey;
+        });
         setTimeout(function () { showStep('step2'); }, 1500);
       } else {
         statusEl.className = 'error';
