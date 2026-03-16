@@ -21,6 +21,14 @@ app.use((req, res, next) => {
   next();
 });
 
+// Normalize double slashes in URL before anything else
+app.use((req, res, next) => {
+  if (req.url.includes('//')) {
+    req.url = req.url.replace(/\/\/+/g, '/');
+  }
+  next();
+});
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
