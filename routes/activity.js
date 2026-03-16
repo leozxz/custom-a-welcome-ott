@@ -97,34 +97,27 @@ router.post('/execute', async (req, res) => {
 
 // POST /activity/save
 router.post('/save', (req, res) => {
-  res.json({ status: 'ok' });
+  console.log('[save] body:', JSON.stringify(req.body, null, 2));
+  res.status(200).json({ status: 'ok' });
 });
 
 // POST /activity/validate
 router.post('/validate', (req, res) => {
-  const { inArguments } = req.body;
-  const args = mergeInArguments(inArguments);
-
-  const errors = [];
-  if (!args.definitionKey) errors.push('definitionKey is required');
-  if (!args.contactKey) errors.push('contactKey is required');
-  if (!args.to) errors.push('to is required');
-
-  if (errors.length > 0) {
-    return res.status(400).json({ errors });
-  }
-
-  res.json({ status: 'ok' });
+  console.log('[validate] body:', JSON.stringify(req.body, null, 2));
+  // Always return 200 — JB treats non-200 as validation failure
+  res.status(200).json({ status: 'ok' });
 });
 
 // POST /activity/publish
 router.post('/publish', (req, res) => {
-  res.json({ status: 'ok' });
+  console.log('[publish] body:', JSON.stringify(req.body, null, 2));
+  res.status(200).json({ status: 'ok' });
 });
 
 // POST /activity/stop
 router.post('/stop', (req, res) => {
-  res.json({ status: 'ok' });
+  console.log('[stop] body:', JSON.stringify(req.body, null, 2));
+  res.status(200).json({ status: 'ok' });
 });
 
 module.exports = router;
