@@ -19,11 +19,18 @@ async function getAccessToken() {
 
   refreshPromise = (async () => {
     try {
-      const response = await axios.post(`${process.env.SFMC_AUTH_URL}/v2/token`, {
+      const body = {
         grant_type: 'client_credentials',
         client_id: process.env.SFMC_CLIENT_ID,
         client_secret: process.env.SFMC_CLIENT_SECRET
-      });
+      };
+
+      // Scope token to specific BU if MID is provided
+      if (process.env.SFMC_MID) {
+        body.account_id = process.env.SFMC_MID;
+      }
+
+      const response = await axios.post(`${process.env.SFMC_AUTH_URL}/v2/token`, body);
 
       cachedToken = response.data.access_token;
       tokenExpiresAt = now + response.data.expires_in * 1000;
